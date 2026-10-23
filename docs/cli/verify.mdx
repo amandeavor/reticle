@@ -7,7 +7,7 @@ icon: circle-check
 `reticle verify` is the CI command: no model in the loop, no MCP. It boots the engine in drive mode, waits for the in-page SDK to dial back, replays every saved flow, renders the verdict, and exits.
 
 ```bash
-npx @reticlehq/server verify <url> [--headed] [--timeout N] [--storage-state <file>]
+npx @reticlehq/server verify <url> [--headed] [--timeout N] [--storage-state <file>] [--expect <json> | --expect-file <path>]
 ```
 
 It uses the same runner and the same verdict as the MCP and HTTP paths, so a platform agent that can only run a shell command gets a byte-identical artifact.
@@ -21,6 +21,13 @@ It uses the same runner and the same verdict as the MCP and HTTP paths, so a pla
 | `--timeout N` | number, ms | `15000` | How long to wait for a browser session to dial back |
 | `--storage-state <file>` | string | unset | A Playwright storage state file. This is how you verify flows behind a login without scripting the login every time |
 | `--results-json <file>` | string | unset | Also write one verdict per journey to this file: `{ verdict, results: [{ journey, verdict, reason? }] }`, each verdict `yes`, `no` or `unknown`. A skipped journey is `unknown`, and the run is `yes` only when every journey is. Written when verify boots its own browser and a run finishes; a refusal before that writes nothing. The [GitHub Action](https://github.com/reticlehq/reticle/tree/main/action) posts this file |
+
+On Windows PowerShell, write the predicate to a file and pass `--expect-file` so the JSON never goes through shell quoting:
+
+```powershell
+'{"kind":"text","contains":"Saved"}' | Set-Content expect.json
+npx @reticlehq/server verify http://localhost:3000 --expect-file expect.json
+```
 
 ## What it prints
 
